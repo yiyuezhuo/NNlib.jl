@@ -162,8 +162,8 @@ for name in (:max, :mean)
             maxpool_already_chose = false
 
             for kd in 1:kernel_d,
-                kh in 1:kernel_h,
-                kw in 1:kernel_w
+                kw in 1:kernel_w,
+                kh in 1:kernel_h
 
                 input_kd = project(d, stride_d, pad_d_lo) + (kd - 1)*dil_d
                 input_kh = project(h, stride_h, pad_h_lo) + (kh - 1)*dil_h
@@ -212,18 +212,16 @@ for name in (:max, :mean)
                         continue
                     end
 
-                    for kh in 1:kernel_h
-                        input_kh = project(h, stride_h, pad_h_lo) + (kh - 1)*dil_h
-                        if input_kh <= 0 || input_kh > height
+                    for kw in 1:kernel_w
+                        input_kw = project(w, stride_w, pad_w_lo) + (kw - 1)*dil_w
+                        if input_kw <= 0 || input_kw > width
                             continue
                         end
-
-                        for kw in 1:kernel_w
-                            input_kw = project(w, stride_w, pad_w_lo) + (kw - 1)*dil_w
-                            if input_kw <= 0 || input_kw > width
+                        for kh in 1:kernel_h
+                            input_kh = project(h, stride_h, pad_h_lo) + (kh - 1)*dil_h
+                            if input_kh <= 0 || input_kh > height
                                 continue
                             end
-
                             # Same as above
                             x_idxs = (input_kw, input_kh, input_kd, c, batch_idx)
                             if $(name == :max)
