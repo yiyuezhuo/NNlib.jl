@@ -148,6 +148,10 @@ for name in (:max, :mean)
             alpha = alpha/prod(kernel_size(pdims))
         end
 
+        if $(name == :max)
+            beta = T(1)
+        end
+
         # Start with the central region
         w_region, h_region, d_region = central_region
         @inbounds for batch_idx in 1:size(x)[end],
@@ -176,7 +180,7 @@ for name in (:max, :mean)
                     # If it's equal; this is the one we chose. We only choose one per
                     # kernel window, all other elements of dx must be zero.
                     if y_idx == x[x_idxs...] && !maxpool_already_chose
-                        dx[x_idxs...] += dy_idx*alpha + beta*dx[x_idxs...]
+                        dx[x_idxs...] = dy_idx*alpha + beta*dx[x_idxs...]
                         maxpool_already_chose = true
                     # Maxpooling does not support `beta` right now.  :(
                     #else
@@ -228,7 +232,7 @@ for name in (:max, :mean)
                             x_idxs = (input_kw, input_kh, input_kd, c, batch_idx)
                             if $(name == :max)
                                 if y_idx == x[x_idxs...] && !maxpool_already_chose
-                                    dx[x_idxs...] += dy_idx*alpha + beta*dx[x_idxs...]
+                                    dx[x_idxs...] = dy_idx*alpha + beta*dx[x_idxs...]
                                     maxpool_already_chose = true
                                 #else
                                 #    dx[x_idxs...] = T(0) + beta*dx[x_idxs...]
